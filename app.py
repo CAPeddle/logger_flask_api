@@ -3,15 +3,13 @@
 from flask import Flask, jsonify, abort, make_response, render_template
 from flask_restful import Api, Resource, reqparse, fields, marshal
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from config import Config
 
-app = Flask(__name__, static_url_path="")
+import config
+
+# Get the application instance
+app = config.app
 api = Api(app)
-app.config.from_object(Config)
-
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+db = config.db
 
 tasks = [
     {
@@ -94,15 +92,6 @@ class TaskAPI(Resource):
         return {'result': True}
 
 
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), index=True, unique=True)
-    email = db.Column(db.String(120), index=True, unique=True)
-    password_hash = db.Column(db.String(128))
-
-    def __repr__(self):
-        return '<User {}>'.format(self.username)  
-        
 @app.route('/')
 def index():
     return render_template('home.html')
