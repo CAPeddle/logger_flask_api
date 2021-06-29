@@ -5,58 +5,49 @@ from flask_restful import Api, Resource, reqparse, fields, marshal
 from flask_sqlalchemy import SQLAlchemy
 
 import config
+from models import Record
 
 # Get the application instance
 app = config.app
 api = Api(app)
 db = config.db
 
-tasks = [
-    {
-        'id': 1,
-        'title': u'Buy groceries',
-        'description': u'Milk, Cheese, Pizza, Fruit, Tylenol',
-        'done': False
-    },
-    {
-        'id': 2,
-        'title': u'Learn Python',
-        'description': u'Need to find a good Python tutorial on the web',
-        'done': False
-    }
-]
-
-task_fields = {
-    'title': fields.String,
-    'description': fields.String,
-    'done': fields.Boolean,
+record_fields = {
+    'measurement': fields.String,
+    'location': fields.String,
+    'value': fields.String,
+    'unit': fields.String,
+    'timestamp': fields.DateTime,
     'uri': fields.Url('task')
 }
-
 
 class TaskListAPI(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('title', type=str, required=True,
-                                   help='No task title provided',
+        self.reqparse.add_argument('measurement', type=str, required=True,
+                                   help='No measurement provided',
                                    location='json')
-        self.reqparse.add_argument('description', type=str, default="",
+        self.reqparse.add_argument('location', type=str, default="",
+                                   location='json')
+        self.reqparse.add_argument('unit', type=str, default="",
                                    location='json')
         super(TaskListAPI, self).__init__()
 
     def get(self):
-        return {'tasks': [marshal(task, task_fields) for task in tasks]}
+        records = Record.query.all()
+        return {'records': [marshal(record, record_fields) for record in records]}
 
     def post(self):
         args = self.reqparse.parse_args()
-        task = {
-            'id': tasks[-1]['id'] + 1 if len(tasks) > 0 else 1,
-            'title': args['title'],
-            'description': args['description'],
-            'done': False
+        print (args)
+        record = {
+            'measurement': args['measurement']
+            ,'location': args['location']
+            ,'unit': args['unit']
         }
-        tasks.append(task)
-        return {'task': marshal(task, task_fields)}, 201
+                
+        db.session.add(record)
+        return {'record': marshal(record, record_fields)}, 201
 
 
 class TaskAPI(Resource):

@@ -8,3 +8,25 @@ https://realpython.com/flask-connexion-rest-api/
 
 to get to the config
 return app.config['SECRET_KEY']
+
+put or post
+PUT method is idempotent.
+POST is NOT idempotent
+
+So POST values
+
+
+/logger/api/log/{temperature}/{emma}
+{
+    "value":"23.2",
+    "unit":"celsius"
+}
+
+log table:
+id value unit time
+
+/logger/view
+
+api.add_resource(TaskListAPI, '/todo/api/v1.0/tasks', endpoint='tasks')
+api.add_resource(TaskAPI, '/todo/api/v1.0/tasks/<int:id>', endpoint='task')
+
